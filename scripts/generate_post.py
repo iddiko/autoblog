@@ -64,6 +64,7 @@ def build_post_html(title, source_link, source_summary, dt):
     safe_title = title.replace("<", "&lt;").replace(">", "&gt;")
     src = f'<p><small>출처: <a href="{source_link}">{source_link}</a></small></p>' if source_link else ""
     hero = hero_image_url(title)
+    inline_queries = pick_inline_queries(title, source_summary)
     body = f"""
 <!doctype html>
 <html lang="ko">
@@ -114,6 +115,9 @@ def build_post_html(title, source_link, source_summary, dt):
     .badge{{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;background:rgba(125,211,252,0.15);color:var(--accent);font-size:13px;letter-spacing:0.01em;}}
     .hero{{margin:16px 0 18px;}}
     .hero img{{width:100%;border-radius:16px;border:1px solid rgba(255,255,255,0.08);box-shadow:0 12px 30px rgba(0,0,0,0.35);display:block;}}
+    .inline-img{{margin:18px 0;}}
+    .inline-img img{{width:100%;border-radius:14px;border:1px solid rgba(255,255,255,0.08);box-shadow:0 10px 24px rgba(0,0,0,0.3);display:block;}}
+    .inline-caption{{color:var(--muted);font-size:13px;margin-top:6px;}}
   </style>
 </head>
 <body>
@@ -128,6 +132,7 @@ def build_post_html(title, source_link, source_summary, dt):
     {src}
     <h3>핵심 요약</h3>
     <p>{source_summary}</p>
+    {inline_image_block(inline_queries[0], "상황을 떠올리게 하는 이미지")}
 
     <h3>바로 쓰는 체크리스트</h3>
     <ul>
@@ -135,6 +140,7 @@ def build_post_html(title, source_link, source_summary, dt):
       <li>가격/대체재/구매 포인트 3개만 정리하기</li>
       <li>관련 상품/서비스 링크(제휴 링크)로 연결하기</li>
     </ul>
+    {inline_image_block(inline_queries[1], "관련 제품/장면 참고")}
 
     <h3>결론</h3>
     <p>오늘 포인트는 “구매/행동으로 이어지는 정보”만 남기는 겁니다. 내일도 자동으로 올라옵니다.</p>
@@ -151,6 +157,26 @@ def hero_image_url(title: str) -> str:
     query = urllib.parse.quote(title or "news")
     # 무료, 키 없이 사용 가능한 Unsplash Source
     return f"https://source.unsplash.com/1200x630/?{query}"
+
+
+def inline_image_block(query: str, caption: str) -> str:
+    url = hero_image_url(query)
+    safe_caption = caption.replace("<", "&lt;").replace(">", "&gt;")
+    return f"""
+    <figure class="inline-img">
+      <img src="{url}" alt="{safe_caption}" loading="lazy" />
+      <figcaption class="inline-caption">{safe_caption}</figcaption>
+    </figure>
+    """
+
+
+def pick_inline_queries(title: str, summary: str):
+    # 간단한 쿼리 생성: 제목 기반 + 요약 키워드
+    base = title.split()[:4] or ["trend"]
+    summary_words = re.sub(r"[^0-9A-Za-z가-힣\\s]", " ", summary).split()
+    summary_words = [w for w in summary_words if len(w) > 1]
+    alt = summary_words[:4] or ["product", "review"]
+    return [" ".join(base), " ".join(alt)]
 
 
 def main():
