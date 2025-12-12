@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Posts</title>
+  <style>
+    body{max-width:900px;margin:40px auto;padding:0 12px;font-family:system-ui;}
+    a{color:#0b63ce;text-decoration:none}a:hover{text-decoration:underline}
+    li{margin:10px 0}
+  </style>
+</head>
+<body>
+  <h1>Posts</h1>
+  <ul id="list"></ul>
+
+  <script>
+    fetch("./posts.json").then(r=>r.json()).then(items=>{
+      const ul=document.getElementById("list");
+      items.sort((a,b)=> (b.date||"").localeCompare(a.date||""));
+      for(const it of items){
+        const li=document.createElement("li");
+        li.innerHTML = `<a href="./${it.file}">${it.title}</a> <small>(${it.date})</small>`;
+        ul.appendChild(li);
+      }
+    }).catch(()=>{
+      document.getElementById("list").innerHTML="<li>posts.json이 아직 없습니다. 첫 자동 발행 후 생성됩니다.</li>";
+    });
+  </script>
+</body>
+</html>
