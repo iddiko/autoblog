@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import urllib.parse
 from datetime import datetime, timezone
 
 try:
@@ -62,6 +63,7 @@ def build_post_html(title, source_link, source_summary, dt):
     date_str = dt.strftime("%Y-%m-%d")
     safe_title = title.replace("<", "&lt;").replace(">", "&gt;")
     src = f'<p><small>출처: <a href="{source_link}">{source_link}</a></small></p>' if source_link else ""
+    hero = hero_image_url(title)
     body = f"""
 <!doctype html>
 <html lang="ko">
@@ -110,6 +112,8 @@ def build_post_html(title, source_link, source_summary, dt):
     hr{{border:none;border-top:1px solid rgba(255,255,255,0.08);margin:26px 0}}
     .nav{{margin-bottom:12px;}}
     .badge{{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;background:rgba(125,211,252,0.15);color:var(--accent);font-size:13px;letter-spacing:0.01em;}}
+    .hero{{margin:16px 0 18px;}}
+    .hero img{{width:100%;border-radius:16px;border:1px solid rgba(255,255,255,0.08);box-shadow:0 12px 30px rgba(0,0,0,0.35);display:block;}}
   </style>
 </head>
 <body>
@@ -118,6 +122,9 @@ def build_post_html(title, source_link, source_summary, dt):
     <div class="badge">Daily Auto Post</div>
     <h1>{safe_title}</h1>
     <p class="muted">{date_str}</p>
+    <figure class="hero">
+      <img src="{hero}" alt="{safe_title}" loading="lazy" />
+    </figure>
     {src}
     <h3>핵심 요약</h3>
     <p>{source_summary}</p>
@@ -138,6 +145,12 @@ def build_post_html(title, source_link, source_summary, dt):
 </html>
 """
     return body
+
+
+def hero_image_url(title: str) -> str:
+    query = urllib.parse.quote(title or "news")
+    # 무료, 키 없이 사용 가능한 Unsplash Source
+    return f"https://source.unsplash.com/1200x630/?{query}"
 
 
 def main():
