@@ -5,26 +5,79 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Posts</title>
   <style>
-    body{max-width:900px;margin:40px auto;padding:0 12px;font-family:system-ui;}
-    a{color:#0b63ce;text-decoration:none}a:hover{text-decoration:underline}
-    li{margin:10px 0}
+    :root{
+      --bg:#0f172a;
+      --panel:#0b1224;
+      --text:#e6ecff;
+      --muted:#9fb4ff;
+      --accent:#7dd3fc;
+      --accent-2:#a78bfa;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:"Inter","Pretendard","Noto Sans KR",system-ui;
+      background:radial-gradient(120% 120% at 20% 20%, #1e293b, #0b1224 60%, #050914);
+      color:var(--text);
+      padding:32px 18px 72px;
+      display:flex;
+      justify-content:center;
+    }
+    .shell{
+      width:100%;
+      max-width:960px;
+      background:rgba(11,18,36,0.7);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:20px;
+      backdrop-filter:blur(6px);
+      padding:24px;
+      box-shadow:0 20px 60px rgba(0,0,0,0.45);
+    }
+    h1{margin:4px 0 8px;font-size:30px;letter-spacing:-0.02em;}
+    p.muted{color:var(--muted);margin:0 0 18px;font-size:15px;}
+    a{color:var(--accent);text-decoration:none;font-weight:600;}
+    a:hover{text-decoration:underline}
+    .list{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;}
+    .card{
+      background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:14px;
+      padding:14px;
+      transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;
+    }
+    .card:hover{transform:translateY(-4px);border-color:rgba(125,211,252,0.45);box-shadow:0 12px 30px rgba(0,0,0,0.35);}
+    .date{color:var(--muted);font-size:13px;margin-top:6px;}
+    .empty{color:var(--muted);padding:12px 0;}
+    .nav{display:flex;gap:10px;margin-bottom:12px;}
+    .nav a{font-weight:600;color:var(--accent);opacity:0.9;}
   </style>
 </head>
 <body>
-  <h1>Posts</h1>
-  <ul id="list"></ul>
+  <main class="shell">
+    <div class="nav"><a href="../">← 홈</a></div>
+    <h1>Posts</h1>
+    <p class="muted">자동으로 생성된 최신 글을 모았습니다.</p>
+    <div id="list" class="list"></div>
+    <div id="empty" class="empty" style="display:none;">posts.json이 아직 없습니다. 첫 자동 발행 후 생성됩니다.</div>
+  </main>
 
   <script>
     fetch("./posts.json").then(r=>r.json()).then(items=>{
-      const ul=document.getElementById("list");
+      const list=document.getElementById("list");
+      const empty=document.getElementById("empty");
+      if(!items || !items.length){
+        empty.style.display="block";return;
+      }
       items.sort((a,b)=> (b.date||"").localeCompare(a.date||""));
       for(const it of items){
-        const li=document.createElement("li");
-        li.innerHTML = `<a href="./${it.file}">${it.title}</a> <small>(${it.date})</small>`;
-        ul.appendChild(li);
+        const card=document.createElement("div");
+        card.className="card";
+        card.innerHTML = `<a href="./${it.file}">${it.title}</a><div class="date">${it.date||""}</div>`;
+        list.appendChild(card);
       }
     }).catch(()=>{
-      document.getElementById("list").innerHTML="<li>posts.json이 아직 없습니다. 첫 자동 발행 후 생성됩니다.</li>";
+      document.getElementById("empty").style.display="block";
     });
   </script>
 </body>
